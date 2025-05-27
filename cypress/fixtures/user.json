@@ -1,9 +1,9 @@
 {
   "success": true,
-  "accessToken": "lorem",
-  "refreshToken": "ipsum",
+  "accessToken": "bebra",
+  "refreshToken": "lox",
   "user": {
-    "email": "mainbum@oldbumbarbershop.ru",
-    "name": "OldBum"
+    "email": "bebra.bebrovna@gmal.com",
+    "name": "Oleg"
   }
 }
