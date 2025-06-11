@@ -1,111 +1,204 @@
+// ======================== IMPORTS & SETUP =================================
 import Cypress from 'cypress';
 
-const API_ROOT = 'https://norma.nomoreparties.space/api';
-const SELECTOR_BUN = `[data-cy='643d69a5c3f7b9001cfa093c']`;
-const SELECTOR_OTHER_BUN = `[data-cy='643d69a5c3f7b9001cfa093d']`;
-const SELECTOR_FILLING = `[data-cy='643d69a5c3f7b9001cfa0941']`;
+// Используем ID из фикстуры
+const API_ENDPOINT = 'https://norma.nomoreparties.space/api';
+const CRATER_BUN_SELECTOR = `[data-cy='643d69a5c3f7b9001cfa093c']`; // Краторная булка N-200i
+const FLUORESCENT_BUN_SELECTOR = `[data-cy='643d69a5c3f7b9001cfa093d']`; // Флюоресцентная булка R2-D3
+const MAGNOLIA_PATTY_SELECTOR = `[data-cy='643d69a5c3f7b9001cfa0941']`; // Биокотлета из марсианской Магнолии
 
-beforeEach(() => {
-  cy.intercept('GET', `${API_ROOT}/ingredients`, {
+// ======================== GLOBAL SETUP =================================
+beforeEach(function() {
+  // Настраиваем перехват API-запросов
+  cy.intercept('GET', `${API_ENDPOINT}/ingredients`, {
     fixture: 'ingredients.json'
   });
-  cy.intercept('POST', `${API_ROOT}/auth/login`, {
+  cy.intercept('POST', `${API_ENDPOINT}/auth/login`, {
     fixture: 'user.json'
   });
-  cy.intercept('GET', `${API_ROOT}/auth/user`, {
+  cy.intercept('GET', `${API_ENDPOINT}/auth/user`, {
     fixture: 'user.json'
   });
-  cy.intercept('POST', `${API_ROOT}/orders`, {
+  cy.intercept('POST', `${API_ENDPOINT}/orders`, {
     fixture: 'orderResponse.json'
   });
+  
+  // Настройка страницы
   cy.visit('/');
   cy.viewport(1440, 800);
-  cy.get('#modals').as('ingredientModal');
+  cy.get('#modals').as('ingredientDetailsPortal');
 });
 
-// Group for ingredient operations
-describe('Ingredient addition to order list', () => {
-  it('increments ingredient counter on add', () => {
-    cy.get(SELECTOR_FILLING).children('button').click();
-    cy.get(SELECTOR_FILLING).find('.counter__num').should('contain', '1');
-  });
-  describe('handling buns and fillings', () => {
-    it('puts bun and filling to order items', () => {
-      cy.get(SELECTOR_BUN).children('button').click();
-      cy.get(SELECTOR_FILLING).children('button').click();
-      // sanity check: both counter should exist
-      cy.get(SELECTOR_BUN).find('.counter__num').should('exist');
-    });
-    it('adds bun after fillings', () => {
-      cy.get(SELECTOR_FILLING).children('button').click();
-      cy.get(SELECTOR_BUN).children('button').click();
-      cy.get(SELECTOR_FILLING).find('.counter__num').should('contain', '1');
+// ======================== INGREDIENTS TESTS =================================
+describe('Функционал добавления ингредиентов в конструктор', function() {
+  it('должен увеличивать счетчик при добавлении ингредиента', function() {
+    // Добавляем котлету и проверяем счетчик
+    cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+      cy.get('button').click();
+      cy.get('.counter__num').should('have.text', '1');
     });
   });
-  describe('bun replacement logic', () => {
-    it('changes bun if only bun exists', () => {
-      cy.get(SELECTOR_BUN).children('button').click();
-      cy.get(SELECTOR_OTHER_BUN).children('button').click();
+  
+  // ======================== BUN & FILLING INTERACTIONS =================================
+  context('Взаимодействие между булками и начинками', function() {
+    it('должен правильно добавлять и булку, и начинку', function() {
+      // Добавляем булку, затем начинку
+      cy.get(CRATER_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      
+      // Проверяем наличие счетчиков
+      cy.get(CRATER_BUN_SELECTOR).find('.counter__num').should('exist');
+      cy.get(MAGNOLIA_PATTY_SELECTOR).find('.counter__num').should('exist');
     });
-    it('replaces bun with another bun while keeping fillings', () => {
-      cy.get(SELECTOR_BUN).children('button').click();
-      cy.get(SELECTOR_FILLING).children('button').click();
-      cy.get(SELECTOR_OTHER_BUN).children('button').click();
+    
+    it('должен сохранять структуру при добавлении булки после начинок', function() {
+      // Сначала добавляем начинку, потом булку
+      cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      cy.get(CRATER_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      
+      // Проверяем корректность счетчиков
+      cy.get(MAGNOLIA_PATTY_SELECTOR).find('.counter__num').should('have.text', '1');
+      cy.get(CRATER_BUN_SELECTOR).find('.counter__num').should('exist');
+    });
+  });
+  
+  // ======================== BUN REPLACEMENT LOGIC =================================
+  context('Механика замены булок', function() {
+    it('должен заменять одну булку на другую', function() {
+      // Добавляем первую булку
+      cy.get(CRATER_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      cy.get(CRATER_BUN_SELECTOR).find('.counter__num').should('exist');
+      
+      // Добавляем вторую булку (должна заменить первую)
+      cy.get(FLUORESCENT_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      cy.get(FLUORESCENT_BUN_SELECTOR).find('.counter__num').should('exist');
+      
+      // Первая булка должна быть заменена
+      cy.get(CRATER_BUN_SELECTOR).find('.counter__num').should('not.exist');
+    });
+    
+    it('должен сохранять начинки при замене булки', function() {
+      // Добавляем булку и начинку
+      cy.get(CRATER_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      
+      // Заменяем булку
+      cy.get(FLUORESCENT_BUN_SELECTOR).within(() => {
+        cy.get('button').click();
+      });
+      
+      // Проверяем, что начинка осталась, а булка заменилась
+      cy.get(MAGNOLIA_PATTY_SELECTOR).find('.counter__num').should('have.text', '1');
+      cy.get(FLUORESCENT_BUN_SELECTOR).find('.counter__num').should('exist');
+      cy.get(CRATER_BUN_SELECTOR).find('.counter__num').should('not.exist');
     });
   });
 });
 
-// Order tests
-describe('Order flow checks', () => {
-  beforeEach(() => {
-    window.localStorage.setItem('refreshToken', 'stellar_token_sample');
-    cy.setCookie('accessToken', 'galactic_access_sample');
+// ======================== ORDER PROCESSING TESTS =================================
+describe('Процесс оформления заказа', function() {
+  beforeEach(function() {
+    // Настраиваем авторизацию
+    window.localStorage.setItem('refreshToken', 'cosmic_refresh_token_xyz');
+    cy.setCookie('accessToken', 'space_access_token_abc');
+    
+    // Проверяем, что токены установлены
     cy.getAllLocalStorage().should('not.be.empty');
     cy.getCookie('accessToken').should('exist');
   });
-  afterEach(() => {
+  
+  afterEach(function() {
+    // Очищаем данные авторизации
     window.localStorage.clear();
     cy.clearAllCookies();
+    
+    // Проверяем, что токены удалены
     cy.getAllLocalStorage().should('be.empty');
     cy.getAllCookies().should('be.empty');
   });
 
-  it('submits the order and verifies response modal', () => {
-    cy.get(SELECTOR_BUN).children('button').click();
-    cy.get(SELECTOR_FILLING).children('button').click();
+  it('должен создавать заказ и отображать номер в модальном окне', function() {
+    // Добавляем необходимые ингредиенты
+    cy.get(CRATER_BUN_SELECTOR).within(() => {
+      cy.get('button').click();
+    });
+    cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+      cy.get('button').click();
+    });
+    
+    // Отправляем заказ
     cy.get("[data-cy='order-button']").click();
-    // Additional check: modal should show the expected order number from fixture
-    cy.get('@ingredientModal').find('h2').should('contain', '38483');
+    
+    // Проверяем, что в модальном окне отображается номер заказа
+    cy.get('@ingredientDetailsPortal').find('h2').contains('38483');
   });
 });
 
-// Various modal window scenarios
-describe('Ingredient modal interactions', () => {
-  it('shows ingredient data in modal on open', () => {
-    cy.get('@ingredientModal').should('be.empty');
-    cy.get(SELECTOR_FILLING).children('a').click();
-    cy.get('@ingredientModal').should('not.be.empty');
+// ======================== MODAL WINDOW TESTS =================================
+describe('Взаимодействие с модальными окнами ингредиентов', function() {
+  it('должен открывать модальное окно с деталями ингредиента', function() {
+    // Проверяем, что модальное окно изначально пусто
+    cy.get('@ingredientDetailsPortal').should('be.empty');
+    
+    // Открываем детали ингредиента
+    cy.get(MAGNOLIA_PATTY_SELECTOR).find('a').click();
+    
+    // Проверяем, что модальное окно открылось и URL обновился
+    cy.get('@ingredientDetailsPortal').should('not.be.empty');
     cy.url().should('include', '643d69a5c3f7b9001cfa0941');
+    
+    // Проверяем содержимое модального окна
+    cy.get('@ingredientDetailsPortal').contains('Биокотлета из марсианской Магнолии');
   });
-  it('closes modal via "✕" button', () => {
-    cy.get('@ingredientModal').should('be.empty');
-    cy.get(SELECTOR_FILLING).children('a').click();
-    cy.get('@ingredientModal').should('not.be.empty');
-    cy.get('@ingredientModal').find('button').click();
-    cy.get('@ingredientModal').should('be.empty');
+  
+  // ======================== MODAL CLOSING METHODS =================================
+  it('должен закрывать модальное окно при нажатии на крестик', function() {
+    // Открываем модальное окно
+    cy.get('@ingredientDetailsPortal').should('be.empty');
+    cy.get(MAGNOLIA_PATTY_SELECTOR).find('a').click();
+    cy.get('@ingredientDetailsPortal').should('not.be.empty');
+    
+    // Закрываем, нажимая на крестик
+    cy.get('@ingredientDetailsPortal').find('button').click();
+    cy.get('@ingredientDetailsPortal').should('be.empty');
   });
-  it('closes modal by clicking overlay', () => {
-    cy.get('@ingredientModal').should('be.empty');
-    cy.get(SELECTOR_FILLING).children('a').click();
-    cy.get('@ingredientModal').should('not.be.empty');
+  
+  it('должен закрывать модальное окно при клике на оверлей', function() {
+    // Открываем модальное окно
+    cy.get('@ingredientDetailsPortal').should('be.empty');
+    cy.get(MAGNOLIA_PATTY_SELECTOR).find('a').click();
+    cy.get('@ingredientDetailsPortal').should('not.be.empty');
+    
+    // Закрываем, кликая на оверлей
     cy.get("[data-cy='overlay']").click({ force: true });
-    cy.get('@ingredientModal').should('be.empty');
+    cy.get('@ingredientDetailsPortal').should('be.empty');
   });
-  it('closes modal when Escape pressed', () => {
-    cy.get('@ingredientModal').should('be.empty');
-    cy.get(SELECTOR_FILLING).children('a').click();
-    cy.get('@ingredientModal').should('not.be.empty');
-    cy.get('body').trigger('keydown', { key: 'Escape' });
-    cy.get('@ingredientModal').should('be.empty');
+  
+  it('должен закрывать модальное окно при нажатии клавиши Escape', function() {
+    // Открываем модальное окно
+    cy.get('@ingredientDetailsPortal').should('be.empty');
+    cy.get(MAGNOLIA_PATTY_SELECTOR).find('a').click();
+    cy.get('@ingredientDetailsPortal').should('not.be.empty');
+    
+    // Закрываем, нажимая Escape
+    cy.get('body').type('{esc}');
+    cy.get('@ingredientDetailsPortal').should('be.empty');
   });
 });
+// ======================== END OF TESTS =================================
