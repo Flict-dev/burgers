@@ -1,0 +1,86 @@
+{
+  "success": true,
+  "name": "Galactic Special Burger",
+  "order": {
+    "createdAt": "2024-04-20T13:29:40.782Z",
+    "ingredients": [
+      {
+        "calories": 643,
+        "carbohydrates": 85,
+        "fat": 26,
+        "image": "https://code.s3.yandex.net/react/code/bun-01.png",
+        "image_large": "https://code.s3.yandex.net/react/code/bun-01-large.png",
+        "image_mobile": "https://code.s3.yandex.net/react/code/bun-01-mobile.png",
+        "name": "Cosmic Bun Alpha-01",
+        "price": 988,
+        "proteins": 44,
+        "type": "bun",
+        "_id": "643d69a5c3f7b9001cfa093d"
+      },
+      {
+        "_id": "643d69a5c3f7b9001cfa0941",
+        "name": "Martian Magnolia Biopatty",
+        "type": "main",
+        "proteins": 420,
+        "fat": 142,
+        "carbohydrates": 242,
+        "calories": 4242,
+        "price": 424,
+        "image": "https://code.s3.yandex.net/react/code/meat-01.png",
+        "image_mobile": "https://code.s3.yandex.net/react/code/meat-01-mobile.png",
+        "image_large": "https://code.s3.yandex.net/react/code/meat-01-large.png"
+      },
+      {
+        "_id": "643d69a5c3f7b9001cfa0944",
+        "name": "Traditional Galactic Sauce",
+        "type": "sauce",
+        "proteins": 42,
+        "fat": 24,
+        "carbohydrates": 42,
+        "calories": 99,
+        "price": 15,
+        "image": "https://code.s3.yandex.net/react/code/sauce-03.png",
+        "image_mobile": "https://code.s3.yandex.net/react/code/sauce-03-mobile.png",
+        "image_large": "https://code.s3.yandex.net/react/code/sauce-03-large.png"
+      },
+      {
+        "_id": "643d69a5c3f7b9001cfa0946",
+        "name": "Crispy Mineral Rings",
+        "type": "main",
+        "proteins": 808,
+        "fat": 689,
+        "carbohydrates": 609,
+        "calories": 986,
+        "price": 300,
+        "image": "https://code.s3.yandex.net/react/code/mineral_rings.png",
+        "image_mobile": "https://code.s3.yandex.net/react/code/mineral_rings-mobile.png",
+        "image_large": "https://code.s3.yandex.net/react/code/mineral_rings-large.png"
+      },
+      {
+        "_id": "643d69a5c3f7b9001cfa094a",
+        "name": "Asteroid Mold Cheese",
+        "type": "main",
+        "proteins": 84,
+        "fat": 48,
+        "carbohydrates": 420,
+        "calories": 3377,
+        "price": 4142,
+        "image": "https://code.s3.yandex.net/react/code/cheese.png",
+        "image_mobile": "https://code.s3.yandex.net/react/code/cheese-mobile.png",
+        "image_large": "https://code.s3.yandex.net/react/code/cheese-large.png"
+      }
+    ],
+    "_id": "6623c34497ede0001d066c4b",
+    "name": "Galactic Special Burger",
+    "number": 38483,
+    "owner": {
+      "email": "cosmonaut@galaxy.rf",
+      "name": "Star Chef",
+      "createdAt": "2024-04-03T12:09:44.278Z",
+      "updatedAt": "2024-04-12T12:06:09.411Z"
+    },
+    "price": 5869,
+    "status": "completed",
+    "updatedAt": "2024-04-20T13:29:41.415Z"
+  }
+}

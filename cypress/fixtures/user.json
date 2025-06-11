@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "accessToken": "galactic_access_sample",
+  "refreshToken": "stellar_token_sample",
+  "user": {
+    "email": "cosmonaut@starship.rf",
+    "name": "Captain Starship"
+  }
+}
