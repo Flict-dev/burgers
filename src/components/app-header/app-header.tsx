@@ -5,5 +5,5 @@ import { getUserState } from '../../services/slices/userSlice/userSlice';
 
 export const AppHeader: FC = () => {
   const data = useSelector(getUserState).userData;
-  return <AppHeaderUI userName={data?.name ?? ''} />;
+  return <AppHeaderUI userName={'' || data?.name} />;
 };

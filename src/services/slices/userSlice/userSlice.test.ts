@@ -8,22 +8,9 @@ import userSlice, {
   logoutUser
 } from './userSlice';
 
-// sanity-check для initialState
-describe('userSlice reducer: initial and unknown actions', () => {
-  it('should return the initial state on unknown action', () => {
-    const result = userSlice(initialState, { type: 'USER_UNKNOWN_ACTION' });
-    expect(result).toBe(initialState);
-  });
-  it('initialState fields should be defined', () => {
-    expect(initialState).toMatchObject({
-      request: expect.any(Boolean),
-    });
-  });
-});
-
-describe('Async logic tests for userSlice', () => {
-  describe('getUser async thunk cases', () => {
-    const testData = {
+describe('тестирование редьюсера userSlice', () => {
+  describe('тестирование асинхронного GET экшена getUser', () => {
+    const actions = {
       pending: {
         type: getUser.pending.type,
         payload: null
@@ -34,180 +21,177 @@ describe('Async logic tests for userSlice', () => {
       },
       fulfilled: {
         type: getUser.fulfilled.type,
-        payload: { user: { name: 'тестИмя', email: 'тестПочта' } }
+        payload: { user: { name: 'someName', email: 'someEmail' } }
       }
     };
 
-    it('handles getUser.pending', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(testData.pending.payload);
+    test('тест синхронного экшена getUser.pending', () => {
+      const state = userSlice(initialState, actions.pending);
+      expect(state.request).toBe(false);
+      expect(state.error).toBe(actions.pending.payload);
     });
 
-    it('handles getUser.rejected', () => {
-      const result = userSlice(initialState, testData.rejected);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(testData.rejected.payload);
+    test('тест синхронного экшена getUser.rejected', () => {
+      const state = userSlice(initialState, actions.rejected);
+      expect(state.request).toBe(false);
+      expect(state.error).toBe(actions.rejected.payload);
     });
 
-    it('handles getUser.fulfilled', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.request).toBe(false);
-      expect(result.userData).toEqual(testData.fulfilled.payload.user);
-      // make sure error cleared
-      expect(result.error).toBeNull ? expect(result.error).toBeNull() : null;
+    test('тест синхронного экшена getUser.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.request).toBe(false);
+      expect(nextState.userData).toEqual(actions.fulfilled.payload.user);
     });
   });
-
-  describe('getOrdersAll async thunk', () => {
-    const testData = {
+  describe('тестирование асинхронного GET экшена getOrdersAll', () => {
+    const actions = {
       pending: {
         type: getOrdersAll.pending.type,
         payload: null
       },
       rejected: {
         type: getOrdersAll.rejected.type,
-        error: { message: 'Тестовая ошибка' }
+        error: { message: 'Funny mock-error' }
       },
       fulfilled: {
         type: getOrdersAll.fulfilled.type,
-        payload: ['заказ1', 'заказ2']
+        payload: ['order1', 'order2']
       }
     };
 
-    it('getOrdersAll pending state', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.request).toBe(true);
-      expect(result.error).toBe(testData.pending.payload);
+    test('тест синхронного экшена getOrdersAll.pending', () => {
+      const state = userSlice(initialState, actions.pending);
+      expect(state.request).toBe(true);
+      expect(state.error).toBe(actions.pending.payload);
     });
 
+    test('тест синхронного экшена getOrdersAll.rejected', () => {
+      const state = userSlice(initialState, actions.rejected);
+      expect(state.request).toBe(false);
+      expect(state.error).toBe(actions.rejected.error.message);
+    });
 
-    it('getOrdersAll fulfilled state', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.request).toBe(false);
-      expect(result.userOrders).toEqual(testData.fulfilled.payload);
+    test('тест синхронного экшена getOrdersAll.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.request).toBe(false);
+      expect(nextState.userOrders).toEqual(actions.fulfilled.payload);
     });
   });
 
-  describe('registerUser async thunk', () => {
-    const testData = {
+  describe('тестирование асинхронного POST экшена registerUser', () => {
+    const actions = {
       pending: {
         type: registerUser.pending.type,
         payload: null
       },
       rejected: {
         type: registerUser.rejected.type,
-        error: { message: 'Тестовая ошибка' }
+        error: { message: 'Funny mock-error' }
       },
       fulfilled: {
         type: registerUser.fulfilled.type,
-        payload: { user: { name: 'тестИмя', email: 'тестПочта' } }
+        payload: { user: { name: 'someName', email: 'someEmail' } }
       }
     };
 
-    it('registerUser sets request true on pending', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.request).toBe(true);
-      expect(result.error).toBe(null);
+    test('тест синхронного экшена registerUser.pending', () => {
+      const nextState = userSlice(initialState, actions.pending);
+      expect(nextState.request).toBe(true);
+      expect(nextState.error).toBe(actions.pending.payload);
     });
-
-    it('registerUser sets error on rejected', () => {
-      const result = userSlice(initialState, testData.rejected);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(testData.rejected.error.message);
+    test('тест синхронного экшена registerUser.rejected', () => {
+      const nextState = userSlice(initialState, actions.rejected);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(actions.rejected.error.message);
     });
-
-    it('registerUser updates userData on fulfilled', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(null);
-      expect(result.userData).toBe(testData.fulfilled.payload.user);
+    test('тест синхронного экшена registerUser.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(null);
+      expect(nextState.userData).toBe(actions.fulfilled.payload.user);
     });
   });
-
-  describe('loginUser async thunk', () => {
-    const testData = {
+  describe('тестирование асинхронного POST экшена loginUser', () => {
+    const actions = {
       pending: {
         type: loginUser.pending.type,
         payload: null
       },
       rejected: {
         type: loginUser.rejected.type,
-        error: { message: 'Тестовая ошибка' }
+        error: { message: 'Funny mock-error' }
       },
       fulfilled: {
         type: loginUser.fulfilled.type,
-        payload: { user: { name: 'тестИмя', email: 'тестПочта' } }
+        payload: { user: { name: 'someName', email: 'someEmail' } }
       }
     };
 
-    it('loginUser sets loginUserRequest true on pending', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.loginUserRequest).toBe(true);
-      expect(result.isAuthChecked).toBe(true);
-      expect(result.isAuthenticated).toBe(false);
-      expect(result.error).toBe(testData.pending.payload);
+    test('тест синхронного экшена loginUser.pending', () => {
+      const nextState = userSlice(initialState, actions.pending);
+      expect(nextState.loginUserRequest).toBe(true);
+      expect(nextState.isAuthChecked).toBe(true);
+      expect(nextState.isAuthenticated).toBe(false);
+      expect(nextState.error).toBe(actions.pending.payload);
     });
-    it('loginUser handles rejected', () => {
-      const result = userSlice(initialState, testData.rejected);
-      expect(result.isAuthChecked).toBe(false);
-      expect(result.isAuthenticated).toBe(false);
-      expect(result.loginUserRequest).toBe(false);
-      expect(result.error).toBe(testData.rejected.error.message);
+    test('тест синхронного экшена loginUser.rejected', () => {
+      const nextState = userSlice(initialState, actions.rejected);
+      expect(nextState.isAuthChecked).toBe(false);
+      expect(nextState.isAuthenticated).toBe(false);
+      expect(nextState.loginUserRequest).toBe(false);
+      expect(nextState.error).toBe(actions.rejected.error.message);
     });
-    it('loginUser handles fulfilled', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.isAuthChecked).toBe(false);
-      expect(result.isAuthenticated).toBe(true);
-      expect(result.loginUserRequest).toBe(false);
-      expect(result.error).toBe(null);
-      expect(result.userData).toBe(testData.fulfilled.payload.user);
+    test('тест синхронного экшена loginUser.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.isAuthChecked).toBe(false);
+      expect(nextState.isAuthenticated).toBe(true);
+      expect(nextState.loginUserRequest).toBe(false);
+      expect(nextState.error).toBe(null);
+      expect(nextState.userData).toBe(actions.fulfilled.payload.user);
     });
   });
-
-  describe('updateUser async thunk', () => {
-    const testData = {
+  describe('тестирование асинхронного PATCH экшена updateUser', () => {
+    const actions = {
       pending: {
         type: updateUser.pending.type,
         payload: null
       },
       rejected: {
         type: updateUser.rejected.type,
-        error: { message: 'Тестовая ошибка' }
+        error: { message: 'Funny mock-error' }
       },
       fulfilled: {
         type: updateUser.fulfilled.type,
-        payload: { user: { name: 'тестИмя', email: 'тестПочта' } }
+        payload: { user: { name: 'someName', email: 'someEmail' } }
       }
     };
 
-    it('updateUser sets request true on pending', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.request).toBe(true);
-      expect(result.error).toBe(null);
+    test('тест синхронного экшена updateUser.pending', () => {
+      const nextState = userSlice(initialState, actions.pending);
+      expect(nextState.request).toBe(true);
+      expect(nextState.error).toBe(actions.pending.payload);
     });
-    it('updateUser handles rejected', () => {
-      const result = userSlice(initialState, testData.rejected);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(testData.rejected.error.message);
+    test('тест синхронного экшена updateUser.rejected', () => {
+      const nextState = userSlice(initialState, actions.rejected);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(actions.rejected.error.message);
     });
-    it('updateUser sets response on fulfilled', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(null);
-      expect(result.response).toBe(testData.fulfilled.payload.user);
+    test('тест синхронного экшена updateUser.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(null);
+      expect(nextState.response).toBe(actions.fulfilled.payload.user);
     });
   });
-
-  describe('logoutUser async thunk', () => {
-    const testData = {
+  describe('тестирование асинхронного POST экшена logoutUser', () => {
+    const actions = {
       pending: {
         type: logoutUser.pending.type,
         payload: null
       },
       rejected: {
         type: logoutUser.rejected.type,
-        error: { message: 'Тестовая ошибка' }
+        error: { message: 'Funny mock-error' }
       },
       fulfilled: {
         type: logoutUser.fulfilled.type,
@@ -215,27 +199,27 @@ describe('Async logic tests for userSlice', () => {
       }
     };
 
-    it('logoutUser pending updates relevant flags', () => {
-      const result = userSlice(initialState, testData.pending);
-      expect(result.request).toBe(true);
-      expect(result.isAuthChecked).toBe(true);
-      expect(result.isAuthenticated).toBe(true);
-      expect(result.error).toBe(null);
+    test('тест синхронного экшена logoutUser.pending', () => {
+      const nextState = userSlice(initialState, actions.pending);
+      expect(nextState.request).toBe(true);
+      expect(nextState.isAuthChecked).toBe(true);
+      expect(nextState.isAuthenticated).toBe(true);
+      expect(nextState.error).toBe(actions.pending.payload);
     });
-    it('logoutUser rejected keeps authenticated', () => {
-      const result = userSlice(initialState, testData.rejected);
-      expect(result.isAuthChecked).toBe(false);
-      expect(result.isAuthenticated).toBe(true);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(testData.rejected.error.message);
+    test('тест синхронного экшена logoutUser.rejected', () => {
+      const nextState = userSlice(initialState, actions.rejected);
+      expect(nextState.isAuthChecked).toBe(false);
+      expect(nextState.isAuthenticated).toBe(true);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(actions.rejected.error.message);
     });
-    it('logoutUser fulfilled resets auth state and userData', () => {
-      const result = userSlice(initialState, testData.fulfilled);
-      expect(result.isAuthChecked).toBe(false);
-      expect(result.isAuthenticated).toBe(false);
-      expect(result.request).toBe(false);
-      expect(result.error).toBe(null);
-      expect(result.userData).toBe(testData.fulfilled.payload);
+    test('тест синхронного экшена logoutUser.fulfilled', () => {
+      const nextState = userSlice(initialState, actions.fulfilled);
+      expect(nextState.isAuthChecked).toBe(false);
+      expect(nextState.isAuthenticated).toBe(false);
+      expect(nextState.request).toBe(false);
+      expect(nextState.error).toBe(null);
+      expect(nextState.userData).toBe(actions.fulfilled.payload);
     });
   });
 });

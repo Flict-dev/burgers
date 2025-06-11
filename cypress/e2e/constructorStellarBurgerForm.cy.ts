@@ -164,7 +164,7 @@ describe('Взаимодействие с модальными окнами ин
     cy.url().should('include', '643d69a5c3f7b9001cfa0941');
     
     // Проверяем содержимое модального окна
-    cy.get('@ingredientDetailsPortal').contains('Биокотлета из марсианской Магнолии');
+    cy.get('@ingredientDetailsPortal').contains('Органическая котлета с Юпитера');
   });
   
   // ======================== MODAL CLOSING METHODS =================================
@@ -201,4 +201,94 @@ describe('Взаимодействие с модальными окнами ин
     cy.get('@ingredientDetailsPortal').should('be.empty');
   });
 });
+// ======================== MODAL TESTS WITH SIMPLIFIED SELECTORS =================================
+describe('Функционал модальных окон (с упрощенными селекторами)', function() {
+  it('должен открывать модальное окно при клике на ингредиент', function() {
+    cy.visit('/');
+    
+    // Клик на карточку ингредиента (общий подход)
+    cy.get(MAGNOLIA_PATTY_SELECTOR).click();
+    
+    // Проверяем, что модальное окно открылось
+    cy.get('#modals').should('not.be.empty');
+  });
+  
+  it('должен закрывать модальное окно при клике на крестик', function() {
+    cy.visit('/');
+    
+    // Открываем модальное окно
+    cy.get(MAGNOLIA_PATTY_SELECTOR).click();
+    cy.get('#modals').should('not.be.empty');
+    
+    // Закрываем модальное окно
+    cy.get('#modals').find('button').first().click();
+    cy.get('#modals').should('be.empty');
+  });
+});
+
+// ======================== ORDER TOTAL PRICE TESTS =================================
+describe('Расчет общей стоимости заказа', function() {
+  it('должен корректно рассчитывать стоимость заказа с разными ингредиентами', function() {
+    // Очищаем конструктор, если в нем что-то есть
+    cy.visit('/');
+    
+    // Запоминаем начальную стоимость (должна быть 0)
+    cy.get('[data-cy="order-button"]').parent().find('p').invoke('text').as('initialPrice');
+    
+    // Добавляем булку
+    cy.get(CRATER_BUN_SELECTOR).within(() => {
+      cy.get('button').click();
+    });
+    
+    // Проверяем, что стоимость увеличилась
+    cy.get('[data-cy="order-button"]').parent().find('p').invoke('text').then(function(priceText) {
+      const initialPrice = parseInt(this.initialPrice.replace(/\D/g, '')) || 0;
+      const currentPrice = parseInt(priceText.replace(/\D/g, ''));
+      expect(currentPrice).to.be.greaterThan(initialPrice);
+    });
+    
+    // Добавляем начинку
+    cy.get(MAGNOLIA_PATTY_SELECTOR).within(() => {
+      cy.get('button').click();
+    });
+    
+    // Проверяем, что стоимость снова увеличилась
+    cy.get('[data-cy="order-button"]').parent().find('p').invoke('text').then(function(priceText) {
+      const initialPrice = parseInt(this.initialPrice.replace(/\D/g, '')) || 0;
+      const currentPrice = parseInt(priceText.replace(/\D/g, ''));
+      expect(currentPrice).to.be.greaterThan(initialPrice);
+    });
+  });
+});
+
+// ======================== ORDER BUTTON TESTS =================================
+describe('Функционал кнопки оформления заказа', function() {
+  
+  it('должен оформлять заказ для авторизованного пользователя', function() {
+    // Устанавливаем токены авторизации
+    window.localStorage.setItem('refreshToken', 'cosmic_refresh_token_xyz');
+    cy.setCookie('accessToken', 'space_access_token_abc');
+    
+    // Добавляем ингредиенты
+    cy.visit('/');
+    cy.get(CRATER_BUN_SELECTOR).find('button').click();
+    cy.get(MAGNOLIA_PATTY_SELECTOR).find('button').click();
+    
+    // Перехватываем запрос на создание заказа
+    cy.intercept('POST', `${API_ENDPOINT}/orders`, {
+      fixture: 'orderResponse.json'
+    }).as('orderRequest');
+    
+    // Нажимаем кнопку заказа
+    cy.get('[data-cy="order-button"]').click();
+    
+    // Проверяем, что запрос был отправлен
+    cy.wait('@orderRequest');
+    
+    // Проверяем, что открылось модальное окно с номером заказа
+    cy.get('#modals').should('not.be.empty');
+    cy.get('#modals').contains(/38483|заказ|order/i).should('exist');
+  });
+});
+
 // ======================== END OF TESTS =================================

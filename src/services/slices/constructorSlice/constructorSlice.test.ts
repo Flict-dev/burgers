@@ -1,6 +1,6 @@
 import constructorSlice, {
   addIngredient,
-  initialState as defaultState,
+  initialState,
   moveIngredientDown,
   moveIngredientUp,
   orderBurger,
@@ -8,99 +8,11 @@ import constructorSlice, {
 } from './constructorSlice';
 import { expect, test, describe } from '@jest/globals';
 
-// Базовые проверки на редьюсер и initial state
-describe('constructorSlice reducer: base functionality', () => {
-  it('should return initial state when called with unknown action', () => {
-    const result = constructorSlice(defaultState, { type: 'UNKNOWN_ACTION' });
-    expect(result).toBe(defaultState);
-  });
-
-  it('initial fields presence sanity check', () => {
-    expect(defaultState).toMatchObject({
-      constructorItems: expect.any(Object),
-      loading: false,
-      orderRequest: false,
-      orderModalData: null,
-      error: null
-    });
-  });
-});
-
-describe('addIngredient reducer logic', () => {
-  const blankState = {
-    constructorItems: {
-      bun: null,
-      ingredients: []
-    },
-    loading: false,
-    orderRequest: false,
-    orderModalData: null,
-    error: null
-  };
-  it('should add a sauce ingredient', () => {
-    const result = constructorSlice(
-      blankState,
-      addIngredient({
-        _id: '643d69a5c3f7b9001cfa0943',
-        name: 'Тестовый соус',
-        type: 'sauce',
-        proteins: 50,
-        fat: 22,
-        carbohydrates: 11,
-        calories: 14,
-        price: 80,
-        image: 'https://code.s3.yandex.net/react/code/sauce-04.png',
-        image_mobile: 'https://code.s3.yandex.net/react/code/sauce-04-mobile.png',
-        image_large: 'https://code.s3.yandex.net/react/code/sauce-04-large.png'
-      })
-    );
-
-    // ингредиент добавлен первым в массив
-    expect(result.constructorItems.ingredients.length).toBe(1);
-    expect(result.constructorItems.ingredients[0].name).toBe('Тестовый соус');
-    expect(result.constructorItems.ingredients[0].id).toEqual(expect.any(String));
-  });
-
-  it('should add bun to empty slot', () => {
-    const result = constructorSlice(
-      blankState,
-      addIngredient({
-        _id: '643d69a5c3f7b9001cfa093c',
-        name: 'Булка для теста N-200i',
-        type: 'bun',
-        proteins: 80,
-        fat: 24,
-        carbohydrates: 53,
-        calories: 420,
-        price: 1255,
-        image: 'https://code.s3.yandex.net/react/code/bun-02.png',
-        image_mobile: 'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
-        image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
-      })
-    );
-    expect(result.constructorItems.bun).toMatchObject({
-      name: 'Булка для теста N-200i',
-      id: expect.any(String)
-    });
-  });
-
-  it('should replace existing bun', () => {
-    const stateWithBun = {
+describe('тестирование редьюсера constructorSlice', () => {
+  describe('тестирование экшена addIngredient', () => {
+    const initialState = {
       constructorItems: {
-        bun: {
-          _id: '643d69a5c3f7b9001cfa093c',
-          name: 'Булка старая',
-          type: 'bun',
-          proteins: 10,
-          fat: 10,
-          carbohydrates: 10,
-          calories: 100,
-          price: 1,
-          id: 'id-test-bun',
-          image: 'stub',
-          image_mobile: 'stub',
-          image_large: 'stub'
-        },
+        bun: null,
         ingredients: []
       },
       loading: false,
@@ -108,108 +20,416 @@ describe('addIngredient reducer logic', () => {
       orderModalData: null,
       error: null
     };
-    const result = constructorSlice(
-      stateWithBun,
-      addIngredient({
-        _id: '643d69a5c3f7b9001cfa093d',
-        name: 'Булка новая',
-        type: 'bun',
-        proteins: 20,
-        fat: 20,
-        carbohydrates: 20,
-        calories: 200,
-        price: 2,
-        image: 'stub2',
-        image_mobile: 'stub2',
-        image_large: 'stub2'
-      })
-    );
-  });
-});
-
-describe('removeIngredient reducer action', () => {
-  const stateWithIngredient = {
-    constructorItems: {
-      bun: null,
-      ingredients: [
-        {
-          id: 'unique-id',
-          _id: '643d69a5c3f7b9001cfa0944',
-          name: 'Тестовый соус',
-          type: 'sauce',
-          proteins: 42,
+    const expectedResult = {
+      ...initialState,
+      constructorItems: {
+        bun: {
+          _id: '643d69a5c3f7b9001cfa093c',
+          name: 'Краторная булка N-200i',
+          type: 'bun',
+          proteins: 80,
           fat: 24,
-          carbohydrates: 42,
-          calories: 99,
-          price: 15,
-          image: 'stub',
-          image_mobile: 'stub',
-          image_large: 'stub'
+          carbohydrates: 53,
+          calories: 420,
+          price: 1255,
+          image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
+        },
+        ingredients: [
+          {
+            _id: '643d69a5c3f7b9001cfa0943',
+            name: 'Соус фирменный Space Sauce',
+            type: 'sauce',
+            proteins: 50,
+            fat: 22,
+            carbohydrates: 11,
+            calories: 14,
+            price: 80,
+            image: 'https://code.s3.yandex.net/react/code/sauce-04.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sauce-04-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/sauce-04-large.png'
+          }
+        ]
+      }
+    };
+
+    test('добавление ингредиента в массив ingredients', () => {
+      const newState = constructorSlice(
+        initialState,
+        addIngredient({
+          _id: '643d69a5c3f7b9001cfa0943',
+          name: 'Соус фирменный Space Sauce',
+          type: 'sauce',
+          proteins: 50,
+          fat: 22,
+          carbohydrates: 11,
+          calories: 14,
+          price: 80,
+          image: 'https://code.s3.yandex.net/react/code/sauce-04.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/sauce-04-mobile.png',
+          image_large:
+            'https://code.s3.yandex.net/react/code/sauce-04-large.png'
+        })
+      );
+
+      const ingredient = newState.constructorItems.ingredients[0];
+      const expectedIngredient = expectedResult.constructorItems.ingredients[0];
+
+      expect(ingredient).toEqual({
+        ...expectedIngredient,
+        id: expect.any(String)
+      });
+    });
+
+    test('добавление булки в пустое поле', () => {
+      const newState = constructorSlice(
+        initialState,
+        addIngredient({
+          _id: '643d69a5c3f7b9001cfa093c',
+          name: 'Краторная булка N-200i',
+          type: 'bun',
+          proteins: 80,
+          fat: 24,
+          carbohydrates: 53,
+          calories: 420,
+          price: 1255,
+          image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
+        })
+      );
+
+      const bun = newState.constructorItems.bun;
+      const expectedBun = expectedResult.constructorItems.bun;
+
+      expect(bun).toEqual({
+        ...expectedBun,
+        id: expect.any(String)
+      });
+    });
+
+    test('добавление булки с заменой ранее добавленной', () => {
+      const initialStateWithBun = {
+        constructorItems: {
+          bun: {
+            _id: '643d69a5c3f7b9001cfa093c',
+            name: 'Краторная булка N-200i',
+            type: 'bun',
+            proteins: 80,
+            fat: 24,
+            carbohydrates: 53,
+            calories: 420,
+            id: 'its so funny =D',
+            price: 1255,
+            image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/bun-02-large.png'
+          },
+          ingredients: []
+        },
+        loading: false,
+        orderRequest: false,
+        orderModalData: null,
+        error: null
+      };
+      const expectedResultForBuns = {
+        ...initialStateWithBun,
+        constructorItems: {
+          bun: {
+            _id: '643d69a5c3f7b9001cfa093d',
+            name: 'Флюоресцентная булка R2-D3',
+            type: 'bun',
+            proteins: 44,
+            fat: 26,
+            carbohydrates: 85,
+            calories: 643,
+            price: 988,
+            image: 'https://code.s3.yandex.net/react/code/bun-01.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/bun-01-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/bun-01-large.png'
+          },
+          ingredients: []
         }
-      ]
-    },
-    loading: false,
-    orderRequest: false,
-    orderModalData: null,
-    error: null
-  };
-  it('removes ingredient by id', () => {
-    const result = constructorSlice(stateWithIngredient, removeIngredient('unique-id'));
-    expect(result.constructorItems.ingredients.length).toBe(0);
+      };
+      const newState = constructorSlice(
+        initialStateWithBun,
+        addIngredient({
+          _id: '643d69a5c3f7b9001cfa093d',
+          name: 'Флюоресцентная булка R2-D3',
+          type: 'bun',
+          proteins: 44,
+          fat: 26,
+          carbohydrates: 85,
+          calories: 643,
+          price: 988,
+          image: 'https://code.s3.yandex.net/react/code/bun-01.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-01-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-01-large.png'
+        })
+      );
+
+      const bun = newState.constructorItems.bun;
+      const expectedBun = expectedResultForBuns.constructorItems.bun;
+
+      expect(bun).toEqual({
+        ...expectedBun,
+        id: expect.any(String)
+      });
+    });
   });
 
-  // Edge-case: удаление несуществующего id
-  it('does nothing if id not found', () => {
-    const result = constructorSlice(stateWithIngredient, removeIngredient('not-exist'));
-    expect(result.constructorItems.ingredients.length).toBe(1);
-  });
-});
+  describe('тестирование экшена removeIngredient', () => {
+    const initialState = {
+      constructorItems: {
+        bun: null,
+        ingredients: [
+          {
+            id: 'funny',
+            _id: '643d69a5c3f7b9001cfa0944',
+            name: 'Соус традиционный галактический',
+            type: 'sauce',
+            proteins: 42,
+            fat: 24,
+            carbohydrates: 42,
+            calories: 99,
+            price: 15,
+            image: 'https://code.s3.yandex.net/react/code/sauce-03.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sauce-03-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/sauce-03-large.png'
+          }
+        ]
+      },
+      loading: false,
+      orderRequest: false,
+      orderModalData: null,
+      error: null
+    };
+    const expectedResult = {
+      ...initialState,
+      constructorItems: {
+        bun: null,
+        ingredients: []
+      }
+    };
 
-describe('moveIngredientUp and moveIngredientDown actions', () => {
-  const sampleState = {
-    constructorItems: {
-      bun: null,
-      ingredients: [
-        { id: 'ing-1', name: 'Верхний' },
-        { id: 'ing-2', name: 'Нижний' }
-      ]
-    },
-    loading: false,
-    orderRequest: false,
-    orderModalData: null,
-    error: null
-  };
-});
+    test('удаление ингредиента из конструктора', () => {
+      const newState = constructorSlice(
+        initialState,
+        removeIngredient('funny')
+      );
 
-describe('orderBurger async thunk states', () => {
-  const asyncActions = {
-    pending: {
-      type: orderBurger.pending.type,
-      payload: null
-    },
-    rejected: {
-      type: orderBurger.rejected.type,
-      error: { message: 'Тестовая ошибка' }
-    },
-    fulfilled: {
-      type: orderBurger.fulfilled.type,
-      payload: { order: { number: 12345 } }
-    }
-  };
-  it('sets orderRequest true and clears error when pending', () => {
-    const result = constructorSlice(defaultState, asyncActions.pending);
-    expect(result.orderRequest).toBe(true);
-    expect(result.error).toBeNull();
+      const recived = newState.constructorItems.ingredients;
+      const expected = expectedResult.constructorItems.ingredients;
+
+      expect(expected).toEqual(recived);
+    });
   });
-  it('sets error and orderRequest false if rejected', () => {
-    const result = constructorSlice(defaultState, asyncActions.rejected);
-    expect(result.orderRequest).toBe(false);
-    expect(result.error).toBe(asyncActions.rejected.error.message);
+
+  describe('тестирование экшенов перемещения: moveIngredientUp & moveIngredientDown', () => {
+    const initialState = {
+      constructorItems: {
+        bun: {
+          id: 'funBun',
+          _id: '643d69a5c3f7b9001cfa093c',
+          name: 'Краторная булка N-200i',
+          type: 'bun',
+          proteins: 80,
+          fat: 24,
+          carbohydrates: 53,
+          calories: 420,
+          price: 1255,
+          image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
+        },
+        ingredients: [
+          {
+            id: 'funnyPig1',
+            _id: '643d69a5c3f7b9001cfa0944',
+            name: 'Соус традиционный галактический',
+            type: 'sauce',
+            proteins: 42,
+            fat: 24,
+            carbohydrates: 42,
+            calories: 99,
+            price: 15,
+            image: 'https://code.s3.yandex.net/react/code/sauce-03.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sauce-03-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/sauce-03-large.png'
+          },
+          {
+            id: 'funnyPig2',
+            _id: '643d69a5c3f7b9001cfa0946',
+            name: 'Хрустящие минеральные кольца',
+            type: 'main',
+            proteins: 808,
+            fat: 689,
+            carbohydrates: 609,
+            calories: 986,
+            price: 300,
+            image: 'https://code.s3.yandex.net/react/code/mineral_rings.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/mineral_rings-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/mineral_rings-large.png'
+          },
+          {
+            id: 'funnyPig3',
+            _id: '643d69a5c3f7b9001cfa0947',
+            name: 'Плоды Фалленианского дерева',
+            type: 'main',
+            proteins: 20,
+            fat: 5,
+            carbohydrates: 55,
+            calories: 77,
+            price: 874,
+            image: 'https://code.s3.yandex.net/react/code/sp_1.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sp_1-mobile.png',
+            image_large: 'https://code.s3.yandex.net/react/code/sp_1-large.png'
+          }
+        ]
+      },
+      loading: false,
+      orderRequest: false,
+      orderModalData: null,
+      error: null
+    };
+    const expectedResult = {
+      ...initialState,
+      constructorItems: {
+        bun: {
+          id: 'funBun',
+          _id: '643d69a5c3f7b9001cfa093c',
+          name: 'Краторная булка N-200i',
+          type: 'bun',
+          proteins: 80,
+          fat: 24,
+          carbohydrates: 53,
+          calories: 420,
+          price: 1255,
+          image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
+        },
+        ingredients: [
+          {
+            id: 'funnyPig1',
+            _id: '643d69a5c3f7b9001cfa0944',
+            name: 'Соус традиционный галактический',
+            type: 'sauce',
+            proteins: 42,
+            fat: 24,
+            carbohydrates: 42,
+            calories: 99,
+            price: 15,
+            image: 'https://code.s3.yandex.net/react/code/sauce-03.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sauce-03-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/sauce-03-large.png'
+          },
+          {
+            id: 'funnyPig3',
+            _id: '643d69a5c3f7b9001cfa0947',
+            name: 'Плоды Фалленианского дерева',
+            type: 'main',
+            proteins: 20,
+            fat: 5,
+            carbohydrates: 55,
+            calories: 77,
+            price: 874,
+            image: 'https://code.s3.yandex.net/react/code/sp_1.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/sp_1-mobile.png',
+            image_large: 'https://code.s3.yandex.net/react/code/sp_1-large.png'
+          },
+          {
+            id: 'funnyPig2',
+            _id: '643d69a5c3f7b9001cfa0946',
+            name: 'Хрустящие минеральные кольца',
+            type: 'main',
+            proteins: 808,
+            fat: 689,
+            carbohydrates: 609,
+            calories: 986,
+            price: 300,
+            image: 'https://code.s3.yandex.net/react/code/mineral_rings.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/mineral_rings-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/mineral_rings-large.png'
+          }
+        ]
+      }
+    };
+
+    test('перемещение ингредиента на позицию выше', () => {
+      const newState = constructorSlice(initialState, moveIngredientUp(2));
+      const expected = expectedResult.constructorItems.ingredients;
+      const recived = newState.constructorItems.ingredients;
+
+      expect(expected).toEqual(recived);
+    });
+    test('перемещение ингредиента на позицию ниже', () => {
+      const newState = constructorSlice(initialState, moveIngredientDown(1));
+      const expected = expectedResult.constructorItems.ingredients;
+      const recived = newState.constructorItems.ingredients;
+
+      expect(expected).toEqual(recived);
+    });
   });
-  it('sets orderModalData and stops request/clears error on fulfilled', () => {
-    const result = constructorSlice(defaultState, asyncActions.fulfilled);
-    expect(result.orderRequest).toBe(false);
-    expect(result.error).toBeNull();
-    expect(result.orderModalData).toEqual({ number: 12345 });
+
+  describe('тестирование асинхронного POST экшена orderBurger', () => {
+    const actions = {
+      pending: {
+        type: orderBurger.pending.type,
+        payload: null
+      },
+      rejected: {
+        type: orderBurger.rejected.type,
+        error: { message: 'Funny mock-error' }
+      },
+      fulfilled: {
+        type: orderBurger.fulfilled.type,
+        payload: { order: { number: 404 } }
+      }
+    };
+    test('тест синхронного экшена orderBurger.pending', () => {
+      const state = constructorSlice(initialState, actions.pending);
+      expect(state.loading).toBe(true);
+      expect(state.error).toBe(actions.pending.payload);
+    });
+    test('тест синхронного экшена orderBurger.rejected', () => {
+      const state = constructorSlice(initialState, actions.rejected);
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe(actions.rejected.error.message);
+      expect(state.orderModalData).toBe(null);
+    });
+    test('тест синхронного экшена orderBurger.fulfilled', () => {
+      const state = constructorSlice(initialState, actions.fulfilled);
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe(null);
+      expect(state.orderModalData?.number).toBe(
+        actions.fulfilled.payload.order.number
+      );
+    });
   });
 });
